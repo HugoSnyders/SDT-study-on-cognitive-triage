@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Social Media Study</title>
+    <script src="https://unpkg.com/jspsych@7.3.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-instructions@1.1.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.3"></script>
+    <link href="https://unpkg.com/jspsych@7.3.3/css/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="plugin-html-slider-response.js"></script>
+    <script src="stimuli.js" charset="UTF-8"></script>
+    <script src="sources.js"></script>
+    <script src="stimuli-source_matcher.js"></script>
+
+    <style>
+        body {
+            background-color: #f0f2f5;
+        }
+
+        /* Let the jsPsych content use the full width */
+        .jspsych-content-wrapper {
+            max-width: 100% !important;
+        }
+
+        .jspsych-content {
+            max-width: 100% !important;
+            padding: 0 !important;
+        }
+
+        .social-media-feed {
+            font-family:
+                -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+                Cantarell, sans-serif;
+        }
+
+        /* Debrief and completion screens */
+        .debrief {
+            width: 60%;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-size: 1em;
+            text-align: left;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: white;
+        }
+
+        .debrief h2 {
+            margin-top: 0;
+        }
+
+        .debrief ul {
+            margin: 8px 0 16px 24px;
+        }
+
+        .social-media-feed .main-container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 20px;
+            padding: 20px;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .social-media-feed .left-sidebar,
+        .social-media-feed .right-sidebar {
+            width: 280px;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .social-media-feed .nav-menu,
+        .social-media-feed .search-container,
+        .social-media-feed .trending-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .social-media-feed .search-container {
+            margin-bottom: 20px;
+        }
+
+        .social-media-feed .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #050505;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 4px;
+        }
+
+        .social-media-feed .nav-item:hover {
+            background-color: #f0f2f5;
+        }
+
+        .social-media-feed .nav-item.active {
+            background-color: #e7f3ff;
+            color: #1877f2;
+        }
+
+        .social-media-feed .nav-icon {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 20px;
+        }
+
+        .social-media-feed .center-content {
+            flex: 1;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .social-media-feed .search-bar {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #e4e6eb;
+            border-radius: 20px;
+            font-size: 14px;
+            background-color: #f0f2f5;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .social-media-feed .trending-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #050505;
+            margin-bottom: 15px;
+        }
+
+        .social-media-feed .trending-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e4e6eb;
+        }
+
+        .social-media-feed .trending-item:last-child {
+            border-bottom: none;
+        }
+
+        .social-media-feed .trending-category {
+            font-size: 12px;
+            color: #65676b;
+            margin-bottom: 2px;
+        }
+
+        .social-media-feed .trending-topic {
+            font-size: 14px;
+            font-weight: 600;
+            color: #050505;
+            margin-bottom: 2px;
+        }
+
+        .social-media-feed .trending-posts {
+            font-size: 12px;
+            color: #65676b;
+        }
+
+        /* Ghost posts: blurred placeholders above and below the active post */
+        .social-media-feed .ghost-post {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            margin-bottom: 15px;
+            opacity: 0.4;
+            filter: blur(3px);
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .social-media-feed .ghost-line {
+            background: #e4e6eb;
+            border-radius: 4px;
+            height: 12px;
+            margin-bottom: 8px;
+        }
+
+        .social-media-feed .ghost-line.short {
+            width: 40%;
+        }
+
+        .social-media-feed .ghost-line.medium {
+            width: 70%;
+        }
+
+        .social-media-feed .ghost-line.long {
+            width: 95%;
+        }
+
+        /* Active post */
+        .social-media-feed .post {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            margin-bottom: 15px;
+            animation: slideInFromBelow 450ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes slideInFromBelow {
+            from {
+                transform: translateY(80px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .social-media-feed .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .social-media-feed .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .social-media-feed .post-author-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .social-media-feed .post-author {
+            font-weight: 600;
+            color: #050505;
+            font-size: 15px;
+            line-height: 1.2;
+        }
+
+        .social-media-feed .post-time {
+            color: #65676b;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        /* Blur the avatar and author name when BLUR_SOURCE is true */
+        .social-media-feed .post.blur-source .post-avatar,
+        .social-media-feed .post.blur-source .post-author {
+            filter: blur(5px);
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .social-media-feed .post-content {
+            color: #050505;
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        /* Button row in html-button-response trials */
+        #jspsych-html-button-response-btngroup {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+
+        .resp-btn {
+            width: 64px;
+            height: 64px;
+            border: none;
+            border-radius: 50%;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            opacity: 0.85;
+        }
+
+        .resp-btn:hover {
+            transform: scale(1.08);
+            opacity: 1;
+        }
+
+        .true-btn {
+            background-color: #42b72a;
+        }
+
+        .false-btn {
+            background-color: #e4304e;
+        }
+
+        /* Hide the sidebars on narrow screens */
+        @media (max-width: 1100px) {
+            .social-media-feed .right-sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .social-media-feed .left-sidebar {
+                display: none;
+            }
+
+            .social-media-feed .center-content {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body></body>
+<script>
+    /* ============================================================
+       Study 4: veracity judgments, one post per trial
+       ============================================================ */
+
+    var jsPsych = initJsPsych({
+        show_progress_bar: true,
+        auto_update_progress_bar: false
+    });
+
+    // capture info from Prolific
+    var subject_id = jsPsych.data.getURLVariable('PROLIFIC_PID');
+    var study_id = jsPsych.data.getURLVariable('STUDY_ID');
+    var session_id = jsPsych.data.getURLVariable('SESSION_ID');
+
+    jsPsych.data.addProperties({
+        subject_id: subject_id,
+        study_id: study_id,
+        session_id: session_id
+    });
+
+    var timeline = [];
+
+    // Number of stimuli drawn from each topic x truth x stance x quality cell
+    var STIMULI_PER_CELL = 3;
+
+    // Whether to blur the avatar and author name of each post
+    var BLUR_SOURCE = false;
+
+    /* Welcome page */
+    var welcome = {
+        type: jsPsychInstructions,
+        pages: [
+            `<div style="width:750px;">
+        <p>Welcome. We'll begin by asking you to share your views on three different topics: nuclear energy, immigration, and social media.</p>
+      </div>`,
+        ],
+        show_clickable_nav: true,
+    };
+    timeline.push(welcome);
+
+    /* Prior beliefs */
+    var priors = {
+        nuclear: null,
+        immigration: null,
+        social_media: null
+    };
+
+    var prior_nuclear = {
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `<div style="width:500px;">
+        <p>Overall, is nuclear energy a good thing or a bad thing for society today?</p>
+      </div>`,
+        min: -100,
+        max: 100,
+        slider_start: 0,
+        slider_number: true,
+        require_movement: true,
+        labels: ["100% Bad", " ", "100% Good"],
+        data: {
+            task: "prior_beliefs",
+            prior_topic: "nuclear"
+        },
+        on_finish: function (data) {
+            priors.nuclear = data.response;
+        },
+    };
+    timeline.push(prior_nuclear);
+
+    var prior_immigration = {
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `<div style="width:500px;">
+        <p>Overall, is immigration a good thing or a bad thing for society today?</p>
+      </div>`,
+        min: -100,
+        max: 100,
+        slider_start: 0,
+        slider_number: true,
+        require_movement: true,
+        labels: ["100% Bad", " ", "100% Good"],
+        data: {
+            task: "prior_beliefs",
+            prior_topic: "immigration"
+        },
+        on_finish: function (data) {
+            priors.immigration = data.response;
+        },
+    };
+    timeline.push(prior_immigration);
+
+    var prior_social_media = {
+        type: jsPsychHtmlSliderResponse,
+        stimulus: `<div style="width:500px;">
+        <p>Overall, is social media a good thing or a bad thing for society today?</p>
+      </div>`,
+        min: -100,
+        max: 100,
+        slider_start: 0,
+        slider_number: true,
+        require_movement: true,
+        labels: ["100% Bad", " ", "100% Good"],
+        data: {
+            task: "prior_beliefs",
+            prior_topic: "social media"
+        },
+        on_finish: function (data) {
+            priors.social_media = data.response;
+        },
+    };
+    timeline.push(prior_social_media);
+
+    /* Feed instructions */
+    var feed_instructions = {
+        type: jsPsychInstructions,
+        on_start: function () {
+            // The progress bar only tracks the feed trials
+            jsPsych.setProgressBar(0);
+        },
+        pages: [
+            `<div style="width:750px; text-align: left;">
+        <p>You will now see a social media feed with several posts. We are interested in whether you think the content of each post is true or false. This task will take approximately 10 minutes.</p>
+        <p>For each post, please evaluate whether you think the content is TRUE or FALSE by clicking the appropriate button:</p>
+<p style="text-align: center; margin: 20px 0;">
+  <span style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #42b72a; color: white; font-size: 18px; font-weight: bold; margin: 0 10px; opacity: 0.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;">✓</span>
+  <span style="margin-right: 20px;">= TRUE</span>
+  <span style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background-color: #e4304e; color: white; font-size: 18px; font-weight: bold; margin: 0 10px; opacity: 0.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;">✕</span>
+  <span>= FALSE</span>
+</p>
+        <p>Please click 'next' when you're ready to begin with the task.</p>
+      </div>`,
+        ],
+        show_clickable_nav: true,
+    };
+    timeline.push(feed_instructions);
+
+    /* Build the stimulus list */
+    var qualityAssigned = assignQualityBalanced(stimuli);
+    var sampledStimuli = sampleBalancedFromCells(qualityAssigned, STIMULI_PER_CELL);
+    var preparedStimuli = prepareRandomizedStimuli(sampledStimuli, sources);
+
+    /* Attention checks */
+    var attentionChecks = [
+        {
+            post_id: "attention_check_true",
+            text: "This is an attention check. In order to indicate that you're actively paying attention to the task, please respond TRUE to this post.",
+            content: "This is an attention check. In order to indicate that you're actively paying attention to the task, please respond TRUE to this post.",
+            true_value: true,
+            stance: "neutral",
+            truth: "true",
+            source: "Current Affairs",
+            author: "Current Affairs",
+            avatar: "C",
+            topic: "attention_check",
+            quality: "NA",
+            wordcount: null
+        },
+        {
+            post_id: "attention_check_false",
+            text: "This is an attention check. In order to indicate that you're actively paying attention to the task, please respond FALSE to this post.",
+            content: "This is an attention check. In order to indicate that you're actively paying attention to the task, please respond FALSE to this post.",
+            true_value: false,
+            stance: "neutral",
+            truth: "false",
+            source: "Morning Briefing",
+            author: "Morning Briefing",
+            avatar: "M",
+            topic: "attention_check",
+            quality: "NA",
+            wordcount: null
+        }
+    ];
+
+    preparedStimuli = preparedStimuli.concat(attentionChecks);
+    preparedStimuli = jsPsych.randomization.shuffle(preparedStimuli);
+
+    /* Feed layout: sidebars and the post between two ghost posts */
+    function ghostPost() {
+        return `
+            <div class="ghost-post">
+                <div style="display:flex; align-items:center; margin-bottom:12px;">
+                    <div style="width:36px; height:36px; border-radius:50%; background:#dcdfe3; margin-right:12px;"></div>
+                    <div style="flex:1;">
+                        <div class="ghost-line short"></div>
+                        <div class="ghost-line short" style="height:8px;"></div>
+                    </div>
+                </div>
+                <div class="ghost-line long"></div>
+                <div class="ghost-line long"></div>
+                <div class="ghost-line medium"></div>
+            </div>`;
+    }
+
+    function buildFeedHTML(post) {
+        return `
+        <div class="social-media-feed">
+            <div class="main-container">
+                <aside class="left-sidebar">
+                    <nav class="nav-menu">
+                        <div class="nav-item active"><span class="nav-icon">🏠</span><span>Home</span></div>
+                        <div class="nav-item"><span class="nav-icon">🔔</span><span>Notifications</span></div>
+                        <div class="nav-item"><span class="nav-icon">👤</span><span>Profile</span></div>
+                        <div class="nav-item"><span class="nav-icon">⚙️</span><span>Settings</span></div>
+                        <div class="nav-item"><span class="nav-icon">🔖</span><span>Bookmarks</span></div>
+                        <div class="nav-item"><span class="nav-icon">💬</span><span>Chat</span></div>
+                    </nav>
+                </aside>
+
+                <div class="center-content">
+                    ${ghostPost()}
+                    <div class="post${BLUR_SOURCE ? ' blur-source' : ''}">
+                        <div class="post-header">
+                            <div class="post-avatar">${post.avatar}</div>
+                            <div class="post-author-info">
+                                <div class="post-author">${post.author}</div>
+                                <div class="post-time">Just now</div>
+                            </div>
+                        </div>
+                        <div class="post-content">${post.content}</div>
+                    </div>
+                    ${ghostPost()}
+                </div>
+
+                <aside class="right-sidebar">
+                    <div class="search-container">
+                        <input type="text" class="search-bar" placeholder="Search..." />
+                    </div>
+                    <div class="trending-container">
+                        <h3 class="trending-title">Trending</h3>
+                        <div class="trending-item">
+                            <div class="trending-category">Energy · Trending</div>
+                            <div class="trending-topic">#Nuclear</div>
+                            <div class="trending-posts">12.4K posts</div>
+                        </div>
+                        <div class="trending-item">
+                            <div class="trending-category">Technology · Trending</div>
+                            <div class="trending-topic">#Social Media</div>
+                            <div class="trending-posts">34.8K posts</div>
+                        </div>
+                        <div class="trending-item">
+                            <div class="trending-category">Society · Trending</div>
+                            <div class="trending-topic">#Immigration</div>
+                            <div class="trending-posts">18.2K posts</div>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>`;
+    }
+
+    /* One veracity trial per post */
+    preparedStimuli.forEach(function (post, idx) {
+        var trial = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: buildFeedHTML(post),
+            choices: ['✓', '✕'],
+            button_html: [
+                '<button class="resp-btn true-btn">%choice%</button>',
+                '<button class="resp-btn false-btn">%choice%</button>'
+            ],
+            data: {
+                task: 'veracity_judgment',
+                trial_index: idx + 1,
+                post_id: post.post_id,
+                topic: post.topic,
+                stance: post.stance,
+                source: post.source,
+                true_value: post.true_value,
+                quality: post.quality,
+                wordcount: post.wordcount
+            },
+            on_finish: function (data) {
+                data.judgment = data.response === 0 ? 'true' : 'false';
+                data.correct = (data.judgment === 'true') === Boolean(post.true_value);
+                // Save the prior beliefs with each judgment
+                data.prior_nuclear = priors.nuclear;
+                data.prior_immigration = priors.immigration;
+                data.prior_social_media = priors.social_media;
+                // Advance the progress bar
+                var curr = jsPsych.getProgressBarCompleted();
+                jsPsych.setProgressBar(curr + (1 / preparedStimuli.length));
+            },
+            on_load: function () {
+                // Move the buttons into the center column, below the posts
+                var center = document.querySelector('.social-media-feed .center-content');
+                var btngroup = document.getElementById('jspsych-html-button-response-btngroup');
+                if (center && btngroup) {
+                    center.appendChild(btngroup);
+                }
+            }
+        };
+        timeline.push(trial);
+    });
+
+    /* Debrief */
+    var debrief = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<div class="debrief">
+            <h2>Debrief</h2>
+            <p>
+                Thank you for participating in this study. The aim of this study was to
+                examine how surface-level quality cues in social media posts (such as
+                excessive capitalization, sensational wording, and emojis) affect how
+                people evaluate whether a post is true or false. We were particularly
+                interested in whether such cues lead people to quickly dismiss
+                low-quality posts, and whether this in turn affects how carefully they
+                evaluate the other posts they encounter.
+            </p>
+
+            <h3>KEY INFORMATION</h3>
+            <p>
+                <b>Important:</b> During this experiment, you encountered some false
+                claims about nuclear energy, immigration, and social media. To prevent any
+                misperceptions resulting from your participation, the second half of this
+                debrief lists each of these false claims along with an explanation of why
+                it is false. Your Prolific completion link is available upon clicking 'Finish' at the bottom of this page.
+            </p>
+
+            <p>
+                <b>If you'd like to revisit this debrief later</b> &mdash; for example, if
+                you don't have time to read through all of it right now &mdash; you can
+                access a standalone version of it by clicking the following <a target="_blank" href="https://run.pavlovia.org/HugoSnijders/study3_test/">link.</a>
+            </p>
+
+            <p>
+                <b>If you'd like to learn more, the following are lists of trustworthy
+                sources that provide reliable information on each topic.</b>
+            </p>
+
+            <p><b>Nuclear energy:</b></p>
+            <ul>
+                <li>International Atomic Energy Agency (IAEA):
+                    <a target="_blank" href="https://www.iaea.org">https://www.iaea.org</a></li>
+                <li>U.S. Nuclear Regulatory Commission:
+                    <a target="_blank" href="https://www.nrc.gov">https://www.nrc.gov</a></li>
+                <li>Our World in Data:
+                    <a target="_blank" href="https://ourworldindata.org/nuclear-energy">https://ourworldindata.org/nuclear-energy</a></li>
+            </ul>
+
+            <p><b>Immigration:</b></p>
+            <ul>
+                <li>Migration Policy Institute:
+                    <a target="_blank" href="https://www.migrationpolicy.org">https://www.migrationpolicy.org</a></li>
+                <li>Pew Research Center &ndash; Immigration &amp; Migration:
+                    <a target="_blank" href="https://www.pewresearch.org/topic/race-ethnicity/immigration-migration/">https://www.pewresearch.org/topic/race-ethnicity/immigration-migration/</a></li>
+                <li>Congressional Budget Office &ndash; Immigration:
+                    <a target="_blank" href="https://www.cbo.gov/topics/immigration">https://www.cbo.gov/topics/immigration</a></li>
+            </ul>
+
+            <p><b>Social media:</b></p>
+            <ul>
+                <li>American Psychological Association &ndash; Social media and the internet:
+                    <a target="_blank" href="https://www.apa.org/topics/social-media-internet">https://www.apa.org/topics/social-media-internet</a></li>
+                <li>Pew Research Center &ndash; Social media:
+                    <a target="_blank" href="https://www.pewresearch.org/topic/internet-technology/platforms-services/social-media/">https://www.pewresearch.org/topic/internet-technology/platforms-services/social-media/</a></li>
+                <li>U.S. Surgeon General &ndash; Social Media and Youth Mental Health:
+                    <a target="_blank" href="https://www.hhs.gov/surgeongeneral/priorities/youth-mental-health/social-media/index.html">https://www.hhs.gov/surgeongeneral/priorities/youth-mental-health/social-media/index.html</a></li>
+            </ul>
+
+            <h3>Detailed corrections of false claims</h3>
+            <p>
+                Below is a complete list of all false claims you may have encountered
+                during the study, along with explanations of why each claim is false.
+            </p>
+
+            <p><b>The following claims <u>supporting</u> nuclear energy were false:</b></p>
+
+            <p><b>Nuclear plants have operated completely accident-free for the past 30 years with zero injuries or environmental damage from any incidents.</b></p>
+            <p><em>Why this is false:</em> Major accidents like Fukushima (2011) occurred within this timeframe, resulting in injuries, evacuations, and substantial environmental contamination.</p>
+
+            <p><b>Modern nuclear reactors can be constructed in just 2-3 years, making them among the quickest power plants to deploy.</b></p>
+            <p><em>Why this is false:</em> Nuclear plants typically take 10&ndash;15+ years to build. Even the fastest modern reactor projects take at least 5&ndash;7 years, making nuclear one of the slowest power sources to deploy, not the quickest.</p>
+
+            <p><b>France eliminated all carbon emissions from its electricity sector after switching to nuclear power in the 1980s, becoming the world's first zero-carbon economy.</b></p>
+            <p><em>Why this is false:</em> While France's electricity sector relies heavily on nuclear power, it has not achieved zero emissions, and France's overall economy still produces significant carbon emissions.</p>
+
+            <p><b>New advanced reactors can <em>completely eliminate</em> existing nuclear waste stockpiles by using them as fuel, replacing the need for permanent storage facilities.</b></p>
+            <p><em>Why this is false:</em> While some advanced reactor designs can partially reprocess waste, no technology can <em>completely eliminate</em> nuclear waste stockpiles or remove the need for permanent storage.</p>
+
+            <p><b>Nuclear power is the safest energy source ever developed, with fewer than 100 deaths from radiation across all civilian accidents in history.</b></p>
+            <p><em>Why this is false:</em> It is difficult to establish with certainty whether specific deaths (primarily those resulting from cancer) can be attributed to radiation exposure. However, conservative estimates for Chernobyl alone (around 300) already exceed 100 people.</p>
+
+            <p><b>Modern nuclear plants no longer need cooling towers or water for cooling because new reactor designs are completely air-cooled like car engines.</b></p>
+            <p><em>Why this is false:</em> Virtually all nuclear reactors, including modern designs, require water-based cooling systems.</p>
+
+            <p><b>The following claims <u>opposing</u> nuclear energy were false:</b></p>
+
+            <p><b>Hospital admission rates for radiation-related illness are significantly higher in communities within 100 miles of nuclear plants compared to the national average.</b></p>
+            <p><em>Why this is false:</em> Multiple large-scale epidemiological studies have found no significant increase in hospital admissions for radiation-related illnesses in communities near nuclear facilities compared to the national average.</p>
+
+            <p><b>Nuclear waste storage sites leak radioactive material into groundwater at most U.S. facilities, contaminating drinking water for millions.</b></p>
+            <p><em>Why this is false:</em> While some sites have experienced leaks, the claim that most facilities leak is not supported by evidence. Most nuclear waste storage sites maintain containment integrity, and widespread contamination of drinking water for millions is not documented.</p>
+
+            <p><b>Radiation pollution from nuclear plants creates permanent dead zones in surrounding waterways where no aquatic life can survive.</b></p>
+            <p><em>Why this is false:</em> The claim conflates radiation with thermal discharge. Nuclear plants release minimal radiation into waterways, but they do release warm cooling water, which can affect local aquatic ecosystems. However, "permanent dead zones" greatly exaggerates the impact of this.</p>
+
+            <p><b>Most nuclear reactors are at extreme risk of failure because they are operating far beyond their originally intended design lifespan.</b></p>
+            <p><em>Why this is false:</em> While some reactors operate beyond their original design life, they undergo rigorous safety reviews for license extensions. Regulatory bodies only approve extensions when safety standards are met, and the claim about extreme risk is not supported by evidence.</p>
+
+            <p><b>Nuclear plants use more than half the electricity they generate just to run their own cooling and safety systems, sharply reducing their net output.</b></p>
+            <p><em>Why this is false:</em> Nuclear plants typically use only 5&ndash;10% of their generated electricity for internal operations including cooling and safety systems. They deliver <em>the vast majority of</em> their output to the grid.</p>
+
+            <p><b>Children born near nuclear facilities have triple the normal rate of birth defects and developmental disorders from chronic radiation exposure.</b></p>
+            <p><em>Why this is false:</em> Scientific studies have found no evidence of elevated birth defects or developmental disorders in populations living near properly operating nuclear facilities.</p>
+
+            <p><b>The following claims <u>supporting</u> immigration were false:</b></p>
+
+            <p><b>Immigration has accounted for more than half of all U.S. economic growth over the past two decades.</b></p>
+            <p><em>Why this is false:</em> Immigration contributes to U.S. economic growth but accounts for a much smaller share than the claim suggests; the CBO estimates the recent immigration surge will add about 0.2 percentage points per year to GDP growth.</p>
+
+            <p><b>Immigrants make up <em>the majority of</em> doctors, nurses, and home health aides working in the United States today.</b></p>
+            <p><em>Why this is false:</em> Immigrants are overrepresented in healthcare but make up only about 18% of healthcare workers overall, including roughly 26% of physicians and 16&ndash;18% of nurses &mdash; not a majority.</p>
+
+            <p><b>Immigrants in the United States contribute more than twice as much in federal taxes each year as they receive in government benefits.</b></p>
+            <p><em>Why this is false:</em> The most authoritative estimate, from the National Academies of Sciences, finds first-generation immigrants are roughly fiscally neutral over a long horizon; the specific "more than twice as much" figure is not supported by mainstream estimates.</p>
+
+            <p><b><em>The majority of</em> new small businesses started in the United States each year are founded by first-generation immigrants.</b></p>
+            <p><em>Why this is false:</em> Immigrants are about 80% more likely than native-born Americans to start a business, but they start roughly 20&ndash;25% of new U.S. businesses, not the majority.</p>
+
+            <p><b>Immigrants in the United States serve in the U.S. military at over twice the rate of native-born Americans.</b></p>
+            <p><em>Why this is false:</em> Foreign-born individuals make up about 5% of active-duty servicemembers but 14&ndash;15% of the U.S. population, meaning they are underrepresented in the military, not overrepresented.</p>
+
+            <p><b>Undocumented immigrants in the United States pay more in federal taxes each year than the richest 1% of Americans combined.</b></p>
+            <p><em>Why this is false:</em> Undocumented immigrants paid about $59 billion in federal taxes in 2022 (ITEP), while the top 1% of U.S. taxpayers paid over $850 billion in federal income taxes alone &mdash; more than ten times as much.</p>
+
+            <p><b>The following claims <u>opposing</u> immigration were false:</b></p>
+
+            <p><b>After becoming a legal resident, each immigrant in the United States typically brings dozens of extended family members into the country.</b></p>
+            <p><em>Why this is false:</em> U.S. immigration law only allows the sponsorship of a limited set of close relatives &mdash; primarily spouses, minor children, parents, and siblings &mdash; and these categories are subject to annual caps and long waiting lists. On average each immigrant sponsors only a few family members over many years, not dozens, and there is no provision for bringing in distant or extended relatives.</p>
+
+            <p><b>The arrival of new immigrants has been the single largest cause of job losses among native-born American workers in the past decade.</b></p>
+            <p><em>Why this is false:</em> Mainstream economic research finds immigration has small, mixed effects on native employment; factors like automation and trade play far larger roles in job losses.</p>
+
+            <p><b>Undocumented immigrants in the United States are eligible for federal welfare benefits regardless of how long they have lived in the country.</b></p>
+            <p><em>Why this is false:</em> Undocumented immigrants are generally ineligible for federal means-tested benefits like SNAP, regular Medicaid, TANF, and federal housing assistance, with limited exceptions for emergency care and a few programs like WIC.</p>
+
+            <p><b>Federal investigations following recent U.S. elections have confirmed that tens of thousands of non-citizens have cast illegal votes.</b></p>
+            <p><em>Why this is false:</em> Audits and investigations consistently find that confirmed cases of non-citizen voting number in the dozens or low hundreds out of millions of votes cast, not tens of thousands.</p>
+
+            <p><b>Recent measles outbreaks across U.S. cities have been driven primarily by undocumented immigrants who entered the country without standard childhood vaccinations.</b></p>
+            <p><em>Why this is false:</em> CDC data show recent U.S. measles outbreaks have been driven primarily by under-vaccinated U.S. residents, not by undocumented immigrants.</p>
+
+            <p><b>Children of immigrants in the United States drop out of high school at significantly higher rates than children of native-born parents.</b></p>
+            <p><em>Why this is false:</em> Second-generation children of immigrants have similar or slightly lower dropout rates than children of native-born parents, and somewhat higher college completion rates.</p>
+
+            <p><b>The following claims <u>supporting</u> social media were false:</b></p>
+
+            <p><b>Teenagers who follow their parents on social media end up much closer to their parents than teenagers who aren't connected to their parents online.</b></p>
+            <p><em>Why this is false:</em> There is no robust evidence that following parents on social media meaningfully changes parent-child closeness, which depends much more on offline relationship quality.</p>
+
+            <p><b>Social media has dramatically shortened how long it takes unemployed Americans to find a new job on average.</b></p>
+            <p><em>Why this is false:</em> There is no evidence that social media has dramatically shortened average unemployment durations, which are driven primarily by labor market conditions.</p>
+
+            <p><b>Students who spend more time on social media score higher on tests of general knowledge and current events than students who rarely use it.</b></p>
+            <p><em>Why this is false:</em> Research generally finds null or modestly negative associations between time spent on social media and academic performance, not positive effects.</p>
+
+            <p><b>People who regularly use social media donate substantially more money to charity each year than people who use it less often.</b></p>
+            <p><em>Why this is false:</em> There is no robust evidence that frequent social media users donate substantially more to charity than less frequent users.</p>
+
+            <p><b>People who use social media regularly are more empathetic and better at understanding other people's perspectives than people who rarely use it.</b></p>
+            <p><em>Why this is false:</em> Research on social media use and empathy is mixed; there is no evidence that regular users are meaningfully more empathetic than non-users.</p>
+
+            <p><b>Regular social media use makes people better at multitasking and handling multiple streams of information at once.</b></p>
+            <p><em>Why this is false:</em> Research consistently finds the opposite: heavy media multitaskers perform worse on tasks requiring working memory, sustained attention, and filtering of irrelevant information.</p>
+
+            <p><b>The following claims <u>opposing</u> social media were false:</b></p>
+
+            <p><b>People who use social media regularly have far more relationship conflicts and are far more likely to divorce than less frequent users.</b></p>
+            <p><em>Why this is false:</em> There is no robust evidence that regular social media users as a group are far more likely to divorce than less frequent users.</p>
+
+            <p><b>Long-term social media use causes permanent physical damage to the areas of the brain responsible for memory and decision-making.</b></p>
+            <p><em>Why this is false:</em> There is no scientific evidence that social media use causes permanent physical damage to brain regions involved in memory or decision-making.</p>
+
+            <p><b>More than 80% of adult Americans who use social media daily meet the clinical criteria for behavioral addiction.</b></p>
+            <p><em>Why this is false:</em> Credible studies estimate the prevalence of problematic or addiction-like social media use at roughly 5&ndash;15%, not above 80%; there is also no formal clinical diagnosis of social media addiction in the DSM-5 or ICD-11.</p>
+
+            <p><b>People who regularly use social media have fewer close friends in real life than people who don't use it.</b></p>
+            <p><em>Why this is false:</em> Research does not support the claim that social media users have fewer close friends; many studies find social media use helps maintain and expand social networks.</p>
+
+            <p><b>Regular social media use reduces adult IQ by more than 5 points within just a few years.</b></p>
+            <p><em>Why this is false:</em> There is no scientific evidence that social media use reduces adult IQ by 5 or more points.</p>
+
+            <p><b>Regular social media use leads to substantially higher rates of physically violent behavior among American teenagers compared to teens who use it less often.</b></p>
+            <p><em>Why this is false:</em> Adolescent violence rates have <em>actually declined</em> as social media use has grown; research does not support a causal link between general social media use and youth violence.</p>
+
+            <p><br /><b>Thank you again for your participation. To receive your Prolific
+            completion code, please click the 'Finish' button below.</b></p>
+        </div>`,
+        choices: ["Finish"]
+    };
+    timeline.push(debrief);
+
+    /* Prolific completion code */
+    var qwerty1234 = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<div class="debrief" style="text-align:center;">
+            <p>
+                Thank you for taking part in this experiment. Please click the link below
+                to confirm your completion with Prolific:
+            </p>
+            <p style="margin: 30px 0; font-size: 1.1em;">
+                <a target="_blank" href="https://app.prolific.com/submissions/complete?cc=PLACEHOLDER">
+                    https://app.prolific.com/submissions/complete?cc=PLACEHOLDER
+                </a>
+            </p>
+        </div>`,
+        choices: "NO_KEYS"
+    };
+    timeline.push(qwerty1234);
+
+    jsPsych.run(timeline);
+</script>
+</html>
